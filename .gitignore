@@ -1,0 +1,7 @@
+__pycache__
+.venv
+models
+main.build
+main.cmd
+main.exe
+requirements.txt
