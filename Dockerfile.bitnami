@@ -1,0 +1,52 @@
+FROM bitnami/pytorch:1.12.1-debian-11-r18
+
+USER root
+RUN apt update && apt-get install -y git
+
+ENV PYTHONFAULTHANDLER=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=off \
+  PIP_DISABLE_PIP_VERSION_CHECK=on \
+  PIP_DEFAULT_TIMEOUT=100 \
+  POETRY_VERSION=1.2.1
+
+WORKDIR /app
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+COPY *.py ./
+
+# FROM python:3.10-slim
+
+# ENV PYTHONFAULTHANDLER=1 \
+#   PYTHONUNBUFFERED=1 \
+#   PYTHONHASHSEED=random \
+#   PIP_NO_CACHE_DIR=off \
+#   PIP_DISABLE_PIP_VERSION_CHECK=on \
+#   PIP_DEFAULT_TIMEOUT=100 \
+#   POETRY_VERSION=1.2.1
+
+# # RUN pip install "poetry==$POETRY_VERSION"
+
+# RUN pip install
+
+# WORKDIR /app
+# COPY poetry.lock pyproject.toml ./
+
+# RUN poetry config virtualenvs.create false \
+#   && poetry install --no-interaction --no-ansi --no-root
+
+# ENV PYTHONFAULTHANDLER=1 \
+#   PYTHONUNBUFFERED=1 \
+#   PYTHONHASHSEED=random \
+#   PIP_NO_CACHE_DIR=off \
+#   PIP_DISABLE_PIP_VERSION_CHECK=on \
+#   PIP_DEFAULT_TIMEOUT=100 \
+#   POETRY_VERSION=1.2.1
+
+# WORKDIR /app
+# COPY requirements.txt ./
+# RUN apt-get update && apt-get install git && pip install -r requirements.txt
+# COPY *.py ./
+
+# CMD ["python", "main.py"]

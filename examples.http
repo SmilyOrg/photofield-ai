@@ -1,0 +1,612 @@
+@api = http://localhost:8081
+@image = P1110220_PreviewImage.jpg
+
+###
+# Single string to embed
+
+POST {{api}}/text-embeddings HTTP/1.1
+Content-Type: application/json
+
+{
+    "texts": ["hawk"]
+}
+
+###
+# Multiple strings to embed
+
+POST {{api}}/text-embeddings HTTP/1.1
+Content-Type: application/json
+
+{
+    "texts": ["hawk", "lion", "tiger", "baby cub"]
+}
+
+###
+# Single image to embed
+
+POST {{api}}/image-embeddings
+Content-Type: multipart/form-data; boundary=------------------------23f534be8db8eca0
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image0"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+
+###
+# Three images to embed
+
+POST {{api}}/image-embeddings
+Content-Type: multipart/form-data; boundary=------------------------23f534be8db8eca0
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image0"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image1"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image2"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+
+###
+# One hundred images to embed at once
+
+POST {{api}}/image-embeddings
+Content-Type: multipart/form-data; boundary=------------------------23f534be8db8eca0
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image1"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image2"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image3"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image4"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image5"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image6"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image7"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image8"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image9"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image10"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image11"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image12"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image13"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image14"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image15"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image16"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image17"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image18"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image19"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image20"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image21"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image22"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image23"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image24"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image25"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image26"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image27"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image28"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image29"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image30"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image31"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image32"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image33"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image34"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image35"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image36"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image37"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image38"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image39"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image40"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image41"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image42"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image43"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image44"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image45"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image46"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image47"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image48"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image49"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image50"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image51"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image52"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image53"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image54"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image55"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image56"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image57"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image58"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image59"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image60"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image61"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image62"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image63"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image64"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image65"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image66"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image67"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image68"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image69"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image70"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image71"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image72"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image73"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image74"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image75"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image76"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image77"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image78"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image79"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image90"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image91"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image92"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image93"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image94"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image95"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image96"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image97"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image98"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image99"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image100"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< {{image}}
+
+--------------------------23f534be8db8eca0
+
+###
