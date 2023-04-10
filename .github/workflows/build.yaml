@@ -23,13 +23,8 @@ jobs:
 
       - name: Download models
         shell: bash
-        run: >
-          wget
-            -q
-            --show-progress --progress=dot:mega
-            -P models/
-            ${{ env.VISUAL_MODEL }}
-            ${{ env.TEXTUAL_MODEL }}
+        run: |
+          wget -q --show-progress --progress=dot:mega -P models/ ${{ env.VISUAL_MODEL }} ${{ env.TEXTUAL_MODEL }}
 
       - name: Docker meta
         id: meta
