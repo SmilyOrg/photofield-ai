@@ -84,7 +84,22 @@ See more on model use in the [CLIP: Model Use] section of the model card from Op
 
 ### Docker
 
-Coming soon™.
+`docker run -it -p 8081:8081 ghcr.io/smilyorg/photofield-ai:latest`
+
+The `clip-vit-base-patch32-(visual|textual)-float16` models are currently
+bundled for a good out-of-the-box experience.
+
+The Docker image is currently CPU-only as I'm currently unable to test Docker
+GPU support (help wanted).
+
+Connect it with [photofield] by adding the following snippet to its
+`configuration.yaml`:
+
+```yaml
+ai:
+  # photofield-ai API server URL
+  host: http://localhost:8081
+```
 
 ### From Source
 
