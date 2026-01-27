@@ -36,6 +36,21 @@ Content-Type: image/jpeg
 --------------------------23f534be8db8eca0
 
 ###
+# Face detection - detect faces in images
+# Returns bounding boxes, confidence scores, and 5-point landmarks for each detected face
+
+POST {{api}}/faces
+Content-Type: multipart/form-data; boundary=------------------------23f534be8db8eca0
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image0"; filename="faces.jpg"
+Content-Type: image/jpeg
+
+< faces.jpg
+
+--------------------------23f534be8db8eca0
+
+###
 # Three images to embed
 
 POST {{api}}/image-embeddings

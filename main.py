@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 
 from PIL import Image
 import numpy as np
+import cv2
 
 from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
@@ -14,6 +15,7 @@ from cliponnx.download import ensure_model
 
 from cliponnx.models import VisualModel, TextualModel, get_available_providers
 from pathlib import Path
+from uniface import RetinaFace
 
 host = environ.get("PHOTOFIELD_AI_HOST", default="0.0.0.0")
 port = environ.get("PHOTOFIELD_AI_PORT", default="8081")
@@ -31,6 +33,7 @@ visual = None
 textual = None
 visual_comp = None
 textual_comp = None
+face_detector = None
 
 input_size = 0
 input_name = None
@@ -43,7 +46,7 @@ async def run_async(fn, *args):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Initialize models and providers
-    global providers, visual, textual, visual_comp, textual_comp
+    global providers, visual, textual, visual_comp, textual_comp, face_detector
     
     models_path = Path(models_dir)
     if not models_path.exists():
@@ -70,11 +73,12 @@ async def lifespan(app: FastAPI):
 
     providers_str = ", ".join(providers)
     print(f"Using providers: {providers_str}")
-    visual, textual, visual_comp, textual_comp = await asyncio.gather(*[
+    visual, textual, visual_comp, textual_comp, face_detector = await asyncio.gather(*[
         run_async(VisualModel, visual_file_path, providers),
         run_async(TextualModel, textual_file_path, providers),
         run_async(VisualModel, visual_comp_path, providers) if visual_comp_path is not None else asyncio.sleep(0),
         run_async(TextualModel, textual_comp_path, providers) if textual_comp_path is not None else asyncio.sleep(0),
+        run_async(RetinaFace),
     ])
     print(f"Listening on {host}:{port}")
     
@@ -154,6 +158,40 @@ async def post_text_embeddings(b: TextEmbeddings):
         })
     return {
         "texts": response_texts
+    }
+
+@app.post("/faces")
+async def post_faces(request: Request):
+    form = await request.form()
+    items = list(form.items())
+    response_images = []
+    
+    for field, file in items:
+        img_bytes = await file.read()
+        # Decode image directly with OpenCV from bytes
+        img_array = np.frombuffer(img_bytes, np.uint8)
+        img_cv = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+        
+        # Detect faces
+        faces = await run_async(face_detector.detect, img_cv)
+        
+        # Convert face results to serializable format
+        face_results = []
+        for face in faces:
+            face_results.append({
+                "bbox": face.bbox.tolist(),  # [x1, y1, x2, y2]
+                "confidence": float(face.confidence),
+                "landmarks": face.landmarks.tolist(),  # 5-point landmarks [[x1, y1], [x2, y2], ...]
+            })
+        
+        response_images.append({
+            "field": field,
+            "filename": file.filename,
+            "faces": face_results,
+        })
+    
+    return {
+        "images": response_images
     }
 
 if __name__ == "__main__":

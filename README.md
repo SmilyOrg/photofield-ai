@@ -53,6 +53,7 @@ Photofield AI is a machine learning companion service for [Photofield], providin
 ### Features
 
 * **Fast CLIP Embeddings** - Convert images and text to semantic vectors for similarity search
+* **Face Detection** - Detect faces in images with bounding boxes, confidence scores, and 5-point landmarks using RetinaFace
 * **High Performance** - ~20 req/sec (i7-5820K CPU), ~200 req/sec (GTX 1070 Ti GPU)
 * **Multiple Models** - Support for various CLIP model sizes and quantization levels
 * **Easy Integration** - Simple REST API with multipart image uploads
@@ -76,6 +77,7 @@ See the [CLIP: Model Use] section for more details on responsible model usage.
 * [FastAPI] - REST API framework
 * [ONNX Runtime] - machine learning inference
 * [CLIP Variants] - CLIP converted to ONNX (by yours truly)
+* [UniFace] - face detection and analysis library
 * [+ more Python libraries](pyproject.toml)
 
 ## Getting Started
@@ -259,6 +261,55 @@ Content-Type: image/jpeg
 }
 ```
 
+## Detect Faces
+
+The `/faces` endpoint accepts multipart image uploads and detects faces in each image, returning bounding boxes, confidence scores, and 5-point facial landmarks. This uses the [UniFace] library with RetinaFace detector.
+
+### Request
+
+```http
+POST {{api}}/faces
+Content-Type: multipart/form-data; boundary=------------------------23f534be8db8eca0
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image0"; filename="faces.jpg"
+Content-Type: image/jpeg
+
+< faces.jpg
+
+--------------------------23f534be8db8eca0
+```
+
+### Response
+
+```json
+{
+  "images": [
+    {
+      "field": "image0",
+      "filename": "photo.jpg",
+      "faces": [
+        {
+          "bbox": [97.6, 447.04, 150.13, 510.99],
+          "confidence": 0.9997,
+          "landmarks": [
+            [113.6, 472.39],
+            [136.25, 470.5],
+            [126.59, 486.55],
+            [118.62, 498.68],
+            [134.62, 497.35]
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+* `bbox` - Bounding box coordinates in [x1, y1, x2, y2] format
+* `confidence` - Detection confidence score (0.0 to 1.0)
+* `landmarks` - 5-point facial landmarks: left eye, right eye, nose, left mouth corner, right mouth corner
+
 ## Configuration
 
 You can configure the app via environment variables.
@@ -402,6 +453,7 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 [FastAPI]: https://fastapi.tiangolo.com/
 [ONNX Runtime]: https://onnxruntime.ai/
 [CLIP Variants]: https://huggingface.co/mlunar/clip-variants
+[UniFace]: https://github.com/yakhyo/uniface
 [clip-variants models]: https://huggingface.co/mlunar/clip-variants/tree/main/models
 [REST Client]: https://marketplace.visualstudio.com/items?itemName=humao.rest-client
 [Task]: https://taskfile.dev/
