@@ -263,7 +263,7 @@ Content-Type: image/jpeg
 
 ## Detect Faces
 
-The `/faces` endpoint accepts multipart image uploads and detects faces in each image, returning bounding boxes, confidence scores, and 5-point facial landmarks. This uses the [UniFace] library with RetinaFace detector.
+The `/faces` endpoint accepts multipart image uploads and detects faces in each image, returning bounding boxes, confidence scores, 5-point facial landmarks, and face recognition embeddings. This uses the [UniFace] library with RetinaFace detector and AdaFace IR_18 for recognition.
 
 ### Request
 
@@ -298,7 +298,9 @@ Content-Type: image/jpeg
             [126.59, 486.55],
             [118.62, 498.68],
             [134.62, 497.35]
-          ]
+          ],
+          "embedding_f16_b64": "...",
+          "embedding_inv_norm_f16_uint16": 15360
         }
       ]
     }
@@ -309,6 +311,8 @@ Content-Type: image/jpeg
 * `bbox` - Bounding box coordinates in [x1, y1, x2, y2] format
 * `confidence` - Detection confidence score (0.0 to 1.0)
 * `landmarks` - 5-point facial landmarks: left eye, right eye, nose, left mouth corner, right mouth corner
+* `embedding_f16_b64` - L2-normalized face recognition embedding as a sequence of 512 base64-encoded float16 values
+* `embedding_inv_norm_f16_uint16` - Inverted L2 norm of the embedding. Always expected to be 15360 for AdaFace as the model normalizes embeddings to unit length.
 
 ## Configuration
 

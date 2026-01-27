@@ -16,6 +16,8 @@ from cliponnx.download import ensure_model
 from cliponnx.models import VisualModel, TextualModel, get_available_providers
 from pathlib import Path
 from uniface import RetinaFace
+from uniface.recognition import AdaFace
+from uniface.constants import AdaFaceWeights
 
 host = environ.get("PHOTOFIELD_AI_HOST", default="0.0.0.0")
 port = environ.get("PHOTOFIELD_AI_PORT", default="8081")
@@ -29,11 +31,12 @@ providers_env = environ.get("PHOTOFIELD_AI_PROVIDERS")
 visual_comp_path = None
 textual_comp_path = None
 
-visual = None
-textual = None
-visual_comp = None
-textual_comp = None
-face_detector = None
+visual: VisualModel
+textual: TextualModel
+visual_comp: VisualModel | None = None
+textual_comp: TextualModel | None = None
+face_detector: RetinaFace
+face_recognizer: AdaFace
 
 input_size = 0
 input_name = None
@@ -46,7 +49,7 @@ async def run_async(fn, *args):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Initialize models and providers
-    global providers, visual, textual, visual_comp, textual_comp, face_detector
+    global providers, visual, textual, visual_comp, textual_comp, face_detector, face_recognizer
     
     models_path = Path(models_dir)
     if not models_path.exists():
@@ -73,12 +76,13 @@ async def lifespan(app: FastAPI):
 
     providers_str = ", ".join(providers)
     print(f"Using providers: {providers_str}")
-    visual, textual, visual_comp, textual_comp, face_detector = await asyncio.gather(*[
+    visual, textual, visual_comp, textual_comp, face_detector, face_recognizer = await asyncio.gather(*[
         run_async(VisualModel, visual_file_path, providers),
         run_async(TextualModel, textual_file_path, providers),
         run_async(VisualModel, visual_comp_path, providers) if visual_comp_path is not None else asyncio.sleep(0),
         run_async(TextualModel, textual_comp_path, providers) if textual_comp_path is not None else asyncio.sleep(0),
         run_async(RetinaFace),
+        run_async(AdaFace, AdaFaceWeights.IR_18),
     ])
     print(f"Listening on {host}:{port}")
     
@@ -178,10 +182,16 @@ async def post_faces(request: Request):
         # Convert face results to serializable format
         face_results = []
         for face in faces:
+            # Get face recognition embedding
+            embedding = await run_async(face_recognizer.get_normalized_embedding, img_cv, face.landmarks)
+            tensor_b64, inv_norm_uint16 = encode_embedding(embedding)
+            
             face_results.append({
                 "bbox": face.bbox.tolist(),  # [x1, y1, x2, y2]
                 "confidence": float(face.confidence),
                 "landmarks": face.landmarks.tolist(),  # 5-point landmarks [[x1, y1], [x2, y2], ...]
+                "embedding_f16_b64": tensor_b64,
+                "embedding_inv_norm_f16_uint16": inv_norm_uint16,
             })
         
         response_images.append({
