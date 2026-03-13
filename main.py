@@ -186,7 +186,9 @@ async def post_faces(request: Request):
         # Decode image directly with OpenCV from bytes
         img_array = np.frombuffer(img_bytes, np.uint8)
         img_cv = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-        
+        if img_cv is None:
+            raise HTTPException(status_code=400, detail=f"could not decode image: {file.filename}")
+
         # Detect faces
         faces = await run_async(face_detector.detect, img_cv)
         
