@@ -2,13 +2,15 @@ import asyncio
 from os import environ
 import io
 import base64
+import logging
 from contextlib import asynccontextmanager
 
 from PIL import Image
 import numpy as np
 import cv2
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Response
+from starlette.requests import ClientDisconnect
 from pydantic import BaseModel
 import uvicorn
 from cliponnx.download import ensure_model
@@ -18,6 +20,9 @@ from pathlib import Path
 from uniface import RetinaFace
 from uniface.recognition import AdaFace
 from uniface.constants import AdaFaceWeights
+
+logging.basicConfig(format="%(message)s", level=logging.INFO)
+log = logging.getLogger(__name__)
 
 host = environ.get("PHOTOFIELD_AI_HOST", default="0.0.0.0")
 port = environ.get("PHOTOFIELD_AI_PORT", default="8081")
@@ -57,12 +62,13 @@ async def lifespan(app: FastAPI):
     if not models_path.is_dir():
         raise NotADirectoryError(f"Models path is not a directory: {models_dir}")
     
+    log.info("photofield-ai")
+
     visual_file_path = ensure_model(visual_path, models_dir)
     textual_file_path = ensure_model(textual_path, models_dir)
 
     available_providers = get_available_providers()
-    available_providers_str = ", ".join(available_providers)
-    print(f"Available providers: {available_providers_str}")
+    log.info("providers available %s", ", ".join(available_providers))
 
     if runtime == "cpu":
         providers = ["CPUExecutionProvider"]
@@ -74,8 +80,8 @@ async def lifespan(app: FastAPI):
     else:
         raise ValueError(f"Unsupported runtime {runtime}, use 'cpu', 'all' or leave empty for defaults")
 
-    providers_str = ", ".join(providers)
-    print(f"Using providers: {providers_str}")
+    log.info("providers %s", ", ".join(providers))
+    log.info("models initializing")
     visual, textual, visual_comp, textual_comp, face_detector, face_recognizer = await asyncio.gather(*[
         run_async(VisualModel, visual_file_path, providers),
         run_async(TextualModel, textual_file_path, providers),
@@ -84,7 +90,9 @@ async def lifespan(app: FastAPI):
         run_async(RetinaFace),
         run_async(AdaFace, AdaFaceWeights.IR_18),
     ])
-    print(f"Listening on {host}:{port}")
+    log.info("face models retinaface detection + adaface ir-18 recognition")
+    log.info("")
+    log.info("listening on %s:%s", host, port)
     
     yield
     
@@ -166,7 +174,10 @@ async def post_text_embeddings(b: TextEmbeddings):
 
 @app.post("/faces")
 async def post_faces(request: Request):
-    form = await request.form()
+    try:
+        form = await request.form()
+    except ClientDisconnect:
+        return Response(status_code=499)
     items = list(form.items())
     response_images = []
     

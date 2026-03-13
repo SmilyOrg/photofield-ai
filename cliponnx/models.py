@@ -30,7 +30,7 @@ def get_available_providers():
 class VisualModel:
     def __init__(self, path, providers=None):
         self.path = path
-        print(f"Loading visual model: {path}")
+        print(f"visual model {path}")
         self.sess = onnxruntime.InferenceSession(path, providers=providers)
         self.input = self.sess.get_inputs()[0]
         self.output = self.sess.get_outputs()[0]
@@ -38,7 +38,7 @@ class VisualModel:
         if len(self.input.shape) != 4 or self.input.shape[2] != self.input.shape[3]:
             raise ValueError(f"unexpected shape {self.input.shape}")
         self.input_size = self.input.shape[2]
-        print(f"Visual inference ready, input size {self.input_size}, type {self.input.type}")
+        print(f"visual model ready input size {self.input_size} type {self.input.type}")
 
     def encode(self, image_input):
         image_input = ensure_input_type(image_input, self.input.type)
@@ -107,7 +107,7 @@ class VisualModel:
 class TextualModel:
     def __init__(self, path, providers=None):
         self.path = path
-        print(f"Loading textual model: {path}")
+        print(f"textual model {path}")
         self.sess = onnxruntime.InferenceSession(path, providers=providers)
         self.input = self.sess.get_inputs()[0]
         self.output = self.sess.get_outputs()[0]
@@ -116,7 +116,7 @@ class TextualModel:
         if len(self.input.shape) != 2 or self.input.shape[1] != 77:
             raise ValueError(f"unexpected shape {self.input.shape}")
         self.input_size = self.input.shape[1]
-        print(f"Textual inference ready, input size {self.input_size}, type {self.input.type}")
+        print(f"textual model ready input size {self.input_size} type {self.input.type}")
 
     def encode(self, texts):
         return self.sess.run([self.output.name], {self.input.name: texts})[0]
