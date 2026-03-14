@@ -3,6 +3,7 @@ from os import environ
 import io
 import base64
 import logging
+import sys
 from contextlib import asynccontextmanager
 
 from PIL import Image
@@ -23,6 +24,8 @@ from uniface.constants import AdaFaceWeights
 
 logging.basicConfig(format="%(message)s", level=logging.INFO)
 log = logging.getLogger(__name__)
+
+version = environ.get("PHOTOFIELD_AI_VERSION", "dev")
 
 host = environ.get("PHOTOFIELD_AI_HOST", default="0.0.0.0")
 port = environ.get("PHOTOFIELD_AI_PORT", default="8081")
@@ -62,7 +65,7 @@ async def lifespan(app: FastAPI):
     if not models_path.is_dir():
         raise NotADirectoryError(f"Models path is not a directory: {models_dir}")
     
-    log.info("photofield-ai")
+    log.info("photofield-ai %s", version)
 
     visual_file_path = ensure_model(visual_path, models_dir)
     textual_file_path = ensure_model(textual_path, models_dir)
@@ -218,4 +221,11 @@ async def post_faces(request: Request):
     }
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host=host, port=port, log_level="warning")
+    import argparse
+    parser = argparse.ArgumentParser(description="photofield-ai")
+    parser.add_argument("--version", "-V", action="store_true", help="print version and exit")
+    args = parser.parse_args()
+    if args.version:
+        print(f"photofield-ai {version}")
+        sys.exit(0)
+    uvicorn.run("main:app", host=host, port=int(port), log_level="warning")

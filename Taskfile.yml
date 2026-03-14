@@ -37,7 +37,7 @@ tasks:
   run:
     desc: Run the server
     cmds:
-      - uv run python main.py
+      - uv run python main.py {{.CLI_ARGS}}
 
   watch:
     desc: Run the server in watch mode with auto-reload
@@ -47,7 +47,7 @@ tasks:
   docker:
     desc: Build a Docker image
     cmds:
-      - docker build -t {{.DOCKER_REPO}}:{{.VERSION}} -t {{.DOCKER_REPO}}:latest .
+      - docker build --build-arg VERSION={{.VERSION}} -t {{.DOCKER_REPO}}:{{.VERSION}} -t {{.DOCKER_REPO}}:latest .
 
   sync:
     desc: Install and sync dependencies
