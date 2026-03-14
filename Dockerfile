@@ -13,6 +13,12 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 ARG VERSION=dev
 ENV PHOTOFIELD_AI_VERSION=$VERSION
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libxcb1 \
+    libgl1 \
+    libglib2.0-0 \
+  && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Copy dependency files
