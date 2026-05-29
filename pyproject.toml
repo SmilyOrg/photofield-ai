@@ -13,7 +13,7 @@ dependencies = [
     "python-multipart>=0.0.20",
     "regex>=2024.11.6",
     "tqdm>=4.67.1",
-    "uniface>=2.2.1",
+    "uniface>=3.7.0",
     "uvicorn>=0.34.2",
 ]
 

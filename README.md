@@ -53,14 +53,14 @@ Photofield AI is a machine learning companion service for [Photofield], providin
 ### Features
 
 * **Fast CLIP Embeddings** - Convert images and text to semantic vectors for similarity search
-* **Face Detection** - Detect faces in images with bounding boxes, confidence scores, and 5-point landmarks using RetinaFace
+* **Face Detection** - Detect faces in images with bounding boxes, confidence scores, 5-point landmarks, and 512-d face embeddings using RetinaFace with EdgeFace XXS recognition
 * **High Performance** - ~20 req/sec (i7-5820K CPU), ~200 req/sec (GTX 1070 Ti GPU)
 * **Multiple Models** - Support for various CLIP model sizes and quantization levels
 * **Easy Integration** - Simple REST API with multipart image uploads
 * **Docker Ready** - Pre-built images available on GitHub Container Registry
 * **Modern Stack** - Built with FastAPI, ONNX Runtime, and Python 3.13+
 
-Run `uv run python benchmark.py` to benchmark on your own hardware.
+Run `uv run python benchmark.py` to benchmark the API endpoints and compare the face embedding performance on your own hardware.
 
 ### Limitations
 
@@ -263,7 +263,7 @@ Content-Type: image/jpeg
 
 ## Detect Faces
 
-The `/faces` endpoint accepts multipart image uploads and detects faces in each image, returning bounding boxes, confidence scores, 5-point facial landmarks, and face recognition embeddings. This uses the [UniFace] library with RetinaFace detector and AdaFace IR_18 for recognition.
+The `/faces` endpoint accepts multipart image uploads and detects faces in each image, returning bounding boxes, confidence scores, 5-point facial landmarks, and face recognition embeddings. This uses the [UniFace] library with RetinaFace detector and EdgeFace XXS for recognition.
 
 ### Request
 
@@ -312,7 +312,7 @@ Content-Type: image/jpeg
 * `confidence` - Detection confidence score (0.0 to 1.0)
 * `landmarks` - 5-point facial landmarks: left eye, right eye, nose, left mouth corner, right mouth corner
 * `embedding_f16_b64` - L2-normalized face recognition embedding as a sequence of 512 base64-encoded float16 values
-* `embedding_inv_norm_f16_uint16` - Inverted L2 norm of the embedding. Always expected to be 15360 for AdaFace as the model normalizes embeddings to unit length.
+* `embedding_inv_norm_f16_uint16` - Inverted L2 norm of the embedding. Face embeddings are normalized before encoding.
 
 ## Configuration
 

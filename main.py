@@ -18,9 +18,11 @@ from cliponnx.download import ensure_model
 
 from cliponnx.models import VisualModel, TextualModel, get_available_providers
 from pathlib import Path
-from uniface import RetinaFace
-from uniface.recognition import AdaFace
-from uniface.constants import AdaFaceWeights
+from typing import Any
+
+from uniface.detection import RetinaFace
+from uniface.recognition import EdgeFace
+from uniface.constants import EdgeFaceWeights
 
 logging.basicConfig(format="%(message)s", level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -44,7 +46,7 @@ textual: TextualModel
 visual_comp: VisualModel | None = None
 textual_comp: TextualModel | None = None
 face_detector: RetinaFace
-face_recognizer: AdaFace
+face_recognizer: EdgeFace
 
 input_size = 0
 input_name = None
@@ -91,9 +93,9 @@ async def lifespan(app: FastAPI):
         run_async(VisualModel, visual_comp_path, providers) if visual_comp_path is not None else asyncio.sleep(0),
         run_async(TextualModel, textual_comp_path, providers) if textual_comp_path is not None else asyncio.sleep(0),
         run_async(RetinaFace),
-        run_async(AdaFace, AdaFaceWeights.IR_18),
+        run_async(lambda: EdgeFace(model_name=EdgeFaceWeights.XXS, providers=providers)),
     ])
-    log.info("face models retinaface detection + adaface ir-18 recognition")
+    log.info("face models retinaface detection + edgeface xxs recognition")
     log.info("")
     log.info("listening on %s:%s", host, port)
     
