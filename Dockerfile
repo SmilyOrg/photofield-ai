@@ -24,7 +24,14 @@ COPY pyproject.toml uv.lock ./
 
 # Install dependencies, patch uniface to eliminate scipy+scikit-image, then strip unused packages
 RUN uv sync --frozen --no-dev --no-install-project --no-cache --python $(which python3) \
+  # uniface requires opencv-python but headless is sufficient; force-reinstall headless so
+  # cv2.abi3.so links to headless libs (no Qt/X11) rather than the full opencv ones
+  && uv pip install --no-cache --no-deps --force-reinstall opencv-python-headless \
   && SP=/app/.venv/lib/python3.13/site-packages \
+  # Remove full opencv libs now that headless cv2.so is in place
+  && rm -rf $SP/opencv_python.libs $SP/opencv_python-*.dist-info \
+  # Remove Qt highgui module (not usable headless)
+  && rm -rf $SP/cv2/qt \
   # Patch uniface to use our numpy-only SimilarityTransform instead of skimage
   && sed -i 's/from skimage.transform import SimilarityTransform/from uniface._similarity import SimilarityTransform/' $SP/uniface/face_utils.py \
   # Remove BYTETracker from uniface exports (it pulls in scipy via kalman filter)
