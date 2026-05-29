@@ -73,7 +73,7 @@ RUN --mount=type=bind,from=ghcr.io/astral-sh/uv:latest,source=/uv,target=/bin/uv
             /usr/lib/x86_64-linux-gnu/libapt-pkg* \
             /usr/lib/x86_64-linux-gnu/libdb-5.3* \
   # Remove locale charset converters
-  && rm -rf /usr/lib/x86_64-linux-gnu/gconv \
+  && rm -rf /usr/lib/x86_64-linux-gnu/gconv
 
 
 # Inject numpy-only SimilarityTransform stub (replaces skimage.transform dependency)
@@ -82,6 +82,10 @@ COPY patches/uniface_similarity.py /app/.venv/lib/python3.13/site-packages/unifa
 COPY models/clip-*.onnx models/
 COPY cliponnx cliponnx
 COPY main.py ./
+
+# Pre-download all models at build time so startup doesn't require network access.
+# --preload runs the full lifespan (same code path as production) then exits cleanly.
+RUN /app/.venv/bin/python main.py --preload
 
 EXPOSE 8081
 CMD ["/app/.venv/bin/python", "main.py"]

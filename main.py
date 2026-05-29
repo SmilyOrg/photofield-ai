@@ -230,8 +230,15 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="photofield-ai")
     parser.add_argument("--version", "-V", action="store_true", help="print version and exit")
+    parser.add_argument("--preload", action="store_true", help="initialize all models then exit (for Docker build caching)")
     args = parser.parse_args()
     if args.version:
         print(f"photofield-ai {version}")
+        sys.exit(0)
+    if args.preload:
+        async def _preload():
+            async with lifespan(app):
+                pass
+        asyncio.run(_preload())
         sys.exit(0)
     uvicorn.run("main:app", host=host, port=int(port), log_level="warning")
