@@ -106,6 +106,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 def encode_embedding(emb):
     inv_norm = np.divide(1, np.linalg.norm(emb), dtype=np.float16)
     inv_norm_uint16 = int.from_bytes(inv_norm.tobytes(), "little")
