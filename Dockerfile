@@ -7,8 +7,7 @@ ENV PYTHONFAULTHANDLER=1 \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100
 
-# Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# uv is mounted at build time only (no persistent layer)
 
 ARG VERSION=dev
 ENV PHOTOFIELD_AI_VERSION=$VERSION
@@ -23,7 +22,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies, patch uniface to eliminate scipy+scikit-image, then strip unused packages
-RUN uv sync --frozen --no-dev --no-install-project --no-cache --python $(which python3) \
+RUN --mount=type=bind,from=ghcr.io/astral-sh/uv:latest,source=/uv,target=/bin/uv \
+  uv sync --frozen --no-dev --no-install-project --no-cache --python $(which python3) \
   # uniface requires opencv-python but headless is sufficient; force-reinstall headless so
   # cv2.abi3.so links to headless libs (no Qt/X11) rather than the full opencv ones
   && uv pip install --no-cache --no-deps --force-reinstall opencv-python-headless \
@@ -45,15 +45,36 @@ RUN uv sync --frozen --no-dev --no-install-project --no-cache --python $(which p
   && find $SP -type d \( -name 'tests' -o -name 'test' \) -exec rm -rf {} + 2>/dev/null; true \
   # Remove cv2 Haar cascades (ONNX-based detection is used instead)
   && rm -rf $SP/cv2/data/ \
+  # Remove onnxruntime dev/optimization tools (not needed at inference time)
+  && rm -rf $SP/onnxruntime/transformers $SP/onnxruntime/quantization \
+             $SP/onnxruntime/tools $SP/onnxruntime/ThirdPartyNotices.txt \
   # Remove system Python extras not needed at runtime
   && rm -rf /usr/local/lib/python3.13/idlelib \
             /usr/local/lib/python3.13/tkinter \
             /usr/local/lib/python3.13/ensurepip \
+            /usr/local/lib/python3.13/unittest \
+            /usr/local/lib/python3.13/pydoc_data \
+            /usr/local/lib/python3.13/turtle.py \
+            /usr/local/lib/python3.13/turtledemo \
             /usr/local/lib/python3.13/site-packages/pip \
+  # Remove CJK legacy-encoding codecs (Shift-JIS, GB2312, EUC-KR, Big5…)
+  # UTF-8 CJK is handled natively; these are only needed for old byte-encoded text
+  && rm -f /usr/local/lib/python3.13/lib-dynload/_codecs_jp.* \
+           /usr/local/lib/python3.13/lib-dynload/_codecs_hk.* \
+           /usr/local/lib/python3.13/lib-dynload/_codecs_cn.* \
+           /usr/local/lib/python3.13/lib-dynload/_codecs_kr.* \
+           /usr/local/lib/python3.13/lib-dynload/_codecs_tw.* \
+           /usr/local/lib/python3.13/lib-dynload/_curses*.* \
+           /usr/local/lib/python3.13/lib-dynload/_testcapi.* \
+           /usr/local/lib/python3.13/lib-dynload/_testlimitedcapi.* \
+           /usr/local/lib/python3.13/lib-dynload/_testclinic*.* \
+  # Remove system packages no longer needed after apt install
+  && rm -rf /usr/lib/x86_64-linux-gnu/perl-base \
+            /usr/lib/x86_64-linux-gnu/libapt-pkg* \
+            /usr/lib/x86_64-linux-gnu/libdb-5.3* \
   # Remove locale charset converters
   && rm -rf /usr/lib/x86_64-linux-gnu/gconv \
-  # Remove uv after use (no longer needed at runtime)
-  && rm -f /bin/uv /bin/uvx
+
 
 # Inject numpy-only SimilarityTransform stub (replaces skimage.transform dependency)
 COPY patches/uniface_similarity.py /app/.venv/lib/python3.13/site-packages/uniface/_similarity.py
