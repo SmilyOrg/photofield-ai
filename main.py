@@ -122,6 +122,10 @@ def compare(a_path, a, b_path, b):
     print(f"B: {b_path}")
     print(f"Similarity: {similarity}")
 
+@app.head("/image-embeddings")
+async def head_image_embeddings():
+    return Response()
+
 @app.post("/image-embeddings")
 async def post_image_embeddings(request: Request):
     form = await request.form()
@@ -160,6 +164,10 @@ async def post_image_embeddings(request: Request):
 class TextEmbeddings(BaseModel):
     texts: list[str]
 
+@app.head("/text-embeddings")
+async def head_text_embeddings():
+    return Response()
+
 @app.post("/text-embeddings")
 async def post_text_embeddings(b: TextEmbeddings):
     text = textual.tokenize(b.texts)
@@ -180,6 +188,10 @@ async def post_text_embeddings(b: TextEmbeddings):
     return {
         "texts": response_texts
     }
+
+@app.head("/faces")
+async def head_faces():
+    return Response()
 
 @app.post("/faces")
 async def post_faces(request: Request):

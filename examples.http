@@ -2,6 +2,19 @@
 @image = heavy-industry.jpg
 
 ###
+# Feature discovery - check which endpoints are available
+
+HEAD {{api}}/text-embeddings
+
+###
+
+HEAD {{api}}/image-embeddings
+
+###
+
+HEAD {{api}}/faces
+
+###
 # Single string to embed
 
 POST {{api}}/text-embeddings HTTP/1.1
