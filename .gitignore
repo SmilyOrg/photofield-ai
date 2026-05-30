@@ -5,3 +5,4 @@ main.build
 main.cmd
 main.exe
 requirements.txt
+testdata/

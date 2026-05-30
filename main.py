@@ -6,7 +6,7 @@ import logging
 import sys
 from contextlib import asynccontextmanager
 
-from PIL import Image
+from PIL import Image, ImageOps
 import numpy as np
 import cv2
 
@@ -133,6 +133,7 @@ async def post_image_embeddings(request: Request):
     items = list(form.items())
     for _, file in items:
         img = Image.open(io.BytesIO(await file.read()))
+        img = ImageOps.exif_transpose(img)
         img_np = await run_async(visual.preprocess, img)
         images.append(img_np)
 
