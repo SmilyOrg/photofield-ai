@@ -20,6 +20,7 @@ from cliponnx.models import VisualModel, TextualModel, get_available_providers
 from pathlib import Path
 from typing import Any
 
+import uniface.model_store as uniface_model_store
 from uniface.detection import RetinaFace
 from uniface.recognition import EdgeFace
 from uniface.constants import EdgeFaceWeights
@@ -62,13 +63,11 @@ async def lifespan(app: FastAPI):
     global providers, visual, textual, visual_comp, textual_comp, face_detector, face_recognizer
     
     models_path = Path(models_dir)
-    if not models_path.exists():
-        raise FileNotFoundError(f"Models directory does not exist: {models_dir}")
-    if not models_path.is_dir():
-        raise NotADirectoryError(f"Models path is not a directory: {models_dir}")
+    models_path.mkdir(parents=True, exist_ok=True)
     
     log.info("photofield-ai %s", version)
 
+    uniface_model_store.set_cache_dir(models_dir)
     visual_file_path = ensure_model(visual_path, models_dir)
     textual_file_path = ensure_model(textual_path, models_dir)
 

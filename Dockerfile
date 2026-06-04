@@ -79,7 +79,6 @@ RUN --mount=type=bind,from=ghcr.io/astral-sh/uv:latest,source=/uv,target=/bin/uv
 # Inject numpy-only SimilarityTransform stub (replaces skimage.transform dependency)
 COPY patches/uniface_similarity.py /app/.venv/lib/python3.13/site-packages/uniface/_similarity.py
 
-COPY models/clip-*.onnx models/
 COPY cliponnx cliponnx
 COPY main.py ./
 
