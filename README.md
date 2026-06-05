@@ -327,6 +327,7 @@ You can configure the app via environment variables.
 | `PHOTOFIELD_AI_TEXTUAL_MODEL` | `https://huggingface.co/mlunar/clip-variants/resolve/main/models/clip-vit-base-patch32-textual-float16.onnx` | Same as `PHOTOFIELD_AI_VISUAL_MODEL`, but for the textual model used for text embedding. |
 | `PHOTOFIELD_AI_RUNTIME` | `all` | `all` enables all available ONNX runtime providers, making use of any GPU or other accelerator device if you have the right [ONNX Runtime] prerequisites installed. `cpu` for CPU-only execution, which is faster to startup and develop with, but it is usually going to be ~10x slower than a GPU at inference. `cpu` is a shortcut for `PHOTOFIELD_AI_PROVIDERS=CPUExecutionProvider`. |
 | `PHOTOFIELD_AI_PROVIDERS` | unset | If `PHOTOFIELD_AI_RUNTIME` is not set, you can use this to specify the ONNX providers you would like to use directly comma-delimited. For example: `CUDAExecutionProvider,CPUExecutionProvider`. |
+| `PHOTOFIELD_AI_FACES_ENABLED` | `1` | Set to `0` to disable face detection/recognition. When disabled, the `/faces` endpoint is not registered and no face models are loaded, reducing memory usage and startup time. |
 
 ### Models
 
