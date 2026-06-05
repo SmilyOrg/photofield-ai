@@ -37,6 +37,7 @@ visual_path = environ.get("PHOTOFIELD_AI_VISUAL_MODEL", default="https://hugging
 textual_path = environ.get("PHOTOFIELD_AI_TEXTUAL_MODEL", default="https://huggingface.co/mlunar/clip-variants/resolve/main/models/clip-vit-base-patch32-textual-float16.onnx")
 runtime = environ.get("PHOTOFIELD_AI_RUNTIME", default="all")
 providers_env = environ.get("PHOTOFIELD_AI_PROVIDERS")
+faces_enabled = environ.get("PHOTOFIELD_AI_FACES_ENABLED", "1") != "0"
 
 # Debug comparison against another model
 visual_comp_path = None
@@ -46,8 +47,8 @@ visual: VisualModel
 textual: TextualModel
 visual_comp: VisualModel | None = None
 textual_comp: TextualModel | None = None
-face_detector: RetinaFace
-face_recognizer: EdgeFace
+face_detector: RetinaFace | None = None
+face_recognizer: EdgeFace | None = None
 
 input_size = 0
 input_name = None
@@ -86,15 +87,25 @@ async def lifespan(app: FastAPI):
 
     log.info("providers %s", ", ".join(providers))
     log.info("models initializing")
-    visual, textual, visual_comp, textual_comp, face_detector, face_recognizer = await asyncio.gather(*[
+    
+    face_tasks = []
+    if faces_enabled:
+        face_tasks = [
+            run_async(RetinaFace),
+            run_async(lambda: EdgeFace(model_name=EdgeFaceWeights.XXS, providers=providers)),
+        ]
+    
+    visual, textual, visual_comp, textual_comp, *face_models = await asyncio.gather(*[
         run_async(VisualModel, visual_file_path, providers),
         run_async(TextualModel, textual_file_path, providers),
         run_async(VisualModel, visual_comp_path, providers) if visual_comp_path is not None else asyncio.sleep(0),
         run_async(TextualModel, textual_comp_path, providers) if textual_comp_path is not None else asyncio.sleep(0),
-        run_async(RetinaFace),
-        run_async(lambda: EdgeFace(model_name=EdgeFaceWeights.XXS, providers=providers)),
+        *face_tasks,
     ])
-    log.info("face models retinaface detection + edgeface xxs recognition")
+    
+    if face_tasks:
+        face_detector, face_recognizer = face_models
+        log.info("face models retinaface detection + edgeface xxs recognition")
     log.info("")
     log.info("listening on %s:%s", host, port)
     
@@ -189,54 +200,55 @@ async def post_text_embeddings(b: TextEmbeddings):
         "texts": response_texts
     }
 
-@app.head("/faces")
-async def head_faces():
-    return Response()
+if faces_enabled:
+    @app.head("/faces")
+    async def head_faces():
+        return Response()
 
-@app.post("/faces")
-async def post_faces(request: Request):
-    try:
-        form = await request.form()
-    except ClientDisconnect:
-        return Response(status_code=499)
-    items = list(form.items())
-    response_images = []
-    
-    for field, file in items:
-        img_bytes = await file.read()
-        # Decode image directly with OpenCV from bytes
-        img_array = np.frombuffer(img_bytes, np.uint8)
-        img_cv = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-        if img_cv is None:
-            raise HTTPException(status_code=400, detail=f"could not decode image: {file.filename}")
-
-        # Detect faces
-        faces = await run_async(face_detector.detect, img_cv)
+    @app.post("/faces")
+    async def post_faces(request: Request):
+        try:
+            form = await request.form()
+        except ClientDisconnect:
+            return Response(status_code=499)
+        items = list(form.items())
+        response_images = []
         
-        # Convert face results to serializable format
-        face_results = []
-        for face in faces:
-            # Get face recognition embedding
-            embedding = await run_async(face_recognizer.get_normalized_embedding, img_cv, face.landmarks)
-            tensor_b64, inv_norm_uint16 = encode_embedding(embedding)
+        for field, file in items:
+            img_bytes = await file.read()
+            # Decode image directly with OpenCV from bytes
+            img_array = np.frombuffer(img_bytes, np.uint8)
+            img_cv = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+            if img_cv is None:
+                raise HTTPException(status_code=400, detail=f"could not decode image: {file.filename}")
+
+            # Detect faces
+            faces = await run_async(face_detector.detect, img_cv)
             
-            face_results.append({
-                "bbox": face.bbox.tolist(),  # [x1, y1, x2, y2]
-                "confidence": float(face.confidence),
-                "landmarks": face.landmarks.tolist(),  # 5-point landmarks [[x1, y1], [x2, y2], ...]
-                "embedding_f16_b64": tensor_b64,
-                "embedding_inv_norm_f16_uint16": inv_norm_uint16,
+            # Convert face results to serializable format
+            face_results = []
+            for face in faces:
+                # Get face recognition embedding
+                embedding = await run_async(face_recognizer.get_normalized_embedding, img_cv, face.landmarks)
+                tensor_b64, inv_norm_uint16 = encode_embedding(embedding)
+                
+                face_results.append({
+                    "bbox": face.bbox.tolist(),  # [x1, y1, x2, y2]
+                    "confidence": float(face.confidence),
+                    "landmarks": face.landmarks.tolist(),  # 5-point landmarks [[x1, y1], [x2, y2], ...]
+                    "embedding_f16_b64": tensor_b64,
+                    "embedding_inv_norm_f16_uint16": inv_norm_uint16,
+                })
+            
+            response_images.append({
+                "field": field,
+                "filename": file.filename,
+                "faces": face_results,
             })
         
-        response_images.append({
-            "field": field,
-            "filename": file.filename,
-            "faces": face_results,
-        })
-    
-    return {
-        "images": response_images
-    }
+        return {
+            "images": response_images
+        }
 
 if __name__ == "__main__":
     import argparse
