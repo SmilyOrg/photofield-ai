@@ -60,7 +60,7 @@ Photofield AI is a machine learning companion service for [Photofield], providin
 * **Docker Ready** - Pre-built images available on GitHub Container Registry
 * **Modern Stack** - Built with FastAPI, ONNX Runtime, and Python 3.13+
 
-Run `uv run python benchmark.py` to benchmark the API endpoints and compare the face embedding performance on your own hardware.
+Run `uv run python benchmark.py` to benchmark on your own hardware (requires the server to be running).
 
 ### Limitations
 
@@ -323,10 +323,10 @@ You can configure the app via environment variables.
 | `PHOTOFIELD_AI_HOST` | `0.0.0.0` | The host the server will listen on. |
 | `PHOTOFIELD_AI_PORT` | `8081` | The port the server will listen on. |
 | `PHOTOFIELD_AI_MODELS_DIR` | `models/` | The directory models will be downloaded to if a URL is provided |
-| `PHOTOFIELD_AI_VISUAL_MODEL` | `https://huggingface.co/mlunar/clip-variants/resolve/main/modelclip-vit-base-patch32-visual-float16.onnx` | URL or local file path to the visual ONNX CLIP model to use for image embedding. If a URL is provided, the model will first be downloaded to `PHOTOFIELD_AI_MODELS_DIR` if it doesn't exist there already. If a local path is provided, the model will be used as is. |
-| `PHOTOFIELD_AI_TEXTUAL_MODEL` | `https://huggingface.co/mlunar/clip-variants/resolve/main/modelclip-vit-base-patch32-textual-float16.onnx` | Same as `PHOTOFIELD_AI_VISUAL_MODEL`, but for the textual model used for text embedding. |
+| `PHOTOFIELD_AI_VISUAL_MODEL` | `https://huggingface.co/mlunar/clip-variants/resolve/main/models/clip-vit-base-patch32-visual-float16.onnx` | URL or local file path to the visual ONNX CLIP model to use for image embedding. If a URL is provided, the model will first be downloaded to `PHOTOFIELD_AI_MODELS_DIR` if it doesn't exist there already. If a local path is provided, the model will be used as is. |
+| `PHOTOFIELD_AI_TEXTUAL_MODEL` | `https://huggingface.co/mlunar/clip-variants/resolve/main/models/clip-vit-base-patch32-textual-float16.onnx` | Same as `PHOTOFIELD_AI_VISUAL_MODEL`, but for the textual model used for text embedding. |
 | `PHOTOFIELD_AI_RUNTIME` | `all` | `all` enables all available ONNX runtime providers, making use of any GPU or other accelerator device if you have the right [ONNX Runtime] prerequisites installed. `cpu` for CPU-only execution, which is faster to startup and develop with, but it is usually going to be ~10x slower than a GPU at inference. `cpu` is a shortcut for `PHOTOFIELD_AI_PROVIDERS=CPUExecutionProvider`. |
-| `PHOTOFIELD_AI_PROVIDERS` | unset | If `PHOTOFIELD_AI_RUNTIME` is not set, you can use this specify the ONNX providers you would like to use directly comma-delimited. For example: `CUDAExecutionProvider,CPUExecutionProvider`. |
+| `PHOTOFIELD_AI_PROVIDERS` | unset | If `PHOTOFIELD_AI_RUNTIME` is not set, you can use this to specify the ONNX providers you would like to use directly comma-delimited. For example: `CUDAExecutionProvider,CPUExecutionProvider`. |
 
 ### Models
 
@@ -452,7 +452,6 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 [norm]: https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm
 
 [Python]: https://www.python.org/
-[Git]: https://git-scm.com/downloads
 [uv]: https://docs.astral.sh/uv/
 [FastAPI]: https://fastapi.tiangolo.com/
 [ONNX Runtime]: https://onnxruntime.ai/
