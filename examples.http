@@ -2,6 +2,19 @@
 @image = heavy-industry.jpg
 
 ###
+# Feature discovery - check which endpoints are available
+
+HEAD {{api}}/text-embeddings
+
+###
+
+HEAD {{api}}/image-embeddings
+
+###
+
+HEAD {{api}}/faces
+
+###
 # Single string to embed
 
 POST {{api}}/text-embeddings HTTP/1.1
@@ -32,6 +45,21 @@ Content-Disposition: form-data; name="image0"; filename="test.jpg"
 Content-Type: image/jpeg
 
 < {{image}}
+
+--------------------------23f534be8db8eca0
+
+###
+# Face detection - detect faces in images
+# Returns bounding boxes, confidence scores, and 5-point landmarks for each detected face
+
+POST {{api}}/faces
+Content-Type: multipart/form-data; boundary=------------------------23f534be8db8eca0
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image0"; filename="faces.jpg"
+Content-Type: image/jpeg
+
+< faces.jpg
 
 --------------------------23f534be8db8eca0
 

@@ -53,13 +53,14 @@ Photofield AI is a machine learning companion service for [Photofield], providin
 ### Features
 
 * **Fast CLIP Embeddings** - Convert images and text to semantic vectors for similarity search
+* **Face Detection** - Detect faces in images with bounding boxes, confidence scores, 5-point landmarks, and 512-d face embeddings using RetinaFace with EdgeFace XXS recognition
 * **High Performance** - ~20 req/sec (i7-5820K CPU), ~200 req/sec (GTX 1070 Ti GPU)
 * **Multiple Models** - Support for various CLIP model sizes and quantization levels
 * **Easy Integration** - Simple REST API with multipart image uploads
 * **Docker Ready** - Pre-built images available on GitHub Container Registry
 * **Modern Stack** - Built with FastAPI, ONNX Runtime, and Python 3.13+
 
-Run `uv run python benchmark.py` to benchmark on your own hardware.
+Run `uv run python benchmark.py` to benchmark on your own hardware (requires the server to be running).
 
 ### Limitations
 
@@ -76,6 +77,7 @@ See the [CLIP: Model Use] section for more details on responsible model usage.
 * [FastAPI] - REST API framework
 * [ONNX Runtime] - machine learning inference
 * [CLIP Variants] - CLIP converted to ONNX (by yours truly)
+* [UniFace] - face detection and analysis library
 * [+ more Python libraries](pyproject.toml)
 
 ## Getting Started
@@ -259,6 +261,59 @@ Content-Type: image/jpeg
 }
 ```
 
+## Detect Faces
+
+The `/faces` endpoint accepts multipart image uploads and detects faces in each image, returning bounding boxes, confidence scores, 5-point facial landmarks, and face recognition embeddings. This uses the [UniFace] library with RetinaFace detector and EdgeFace XXS for recognition.
+
+### Request
+
+```http
+POST {{api}}/faces
+Content-Type: multipart/form-data; boundary=------------------------23f534be8db8eca0
+
+--------------------------23f534be8db8eca0
+Content-Disposition: form-data; name="image0"; filename="faces.jpg"
+Content-Type: image/jpeg
+
+< faces.jpg
+
+--------------------------23f534be8db8eca0
+```
+
+### Response
+
+```json
+{
+  "images": [
+    {
+      "field": "image0",
+      "filename": "photo.jpg",
+      "faces": [
+        {
+          "bbox": [97.6, 447.04, 150.13, 510.99],
+          "confidence": 0.9997,
+          "landmarks": [
+            [113.6, 472.39],
+            [136.25, 470.5],
+            [126.59, 486.55],
+            [118.62, 498.68],
+            [134.62, 497.35]
+          ],
+          "embedding_f16_b64": "...",
+          "embedding_inv_norm_f16_uint16": 15360
+        }
+      ]
+    }
+  ]
+}
+```
+
+* `bbox` - Bounding box coordinates in [x1, y1, x2, y2] format
+* `confidence` - Detection confidence score (0.0 to 1.0)
+* `landmarks` - 5-point facial landmarks: left eye, right eye, nose, left mouth corner, right mouth corner
+* `embedding_f16_b64` - L2-normalized face recognition embedding as a sequence of 512 base64-encoded float16 values
+* `embedding_inv_norm_f16_uint16` - Inverted L2 norm of the embedding. Face embeddings are normalized before encoding.
+
 ## Configuration
 
 You can configure the app via environment variables.
@@ -268,10 +323,11 @@ You can configure the app via environment variables.
 | `PHOTOFIELD_AI_HOST` | `0.0.0.0` | The host the server will listen on. |
 | `PHOTOFIELD_AI_PORT` | `8081` | The port the server will listen on. |
 | `PHOTOFIELD_AI_MODELS_DIR` | `models/` | The directory models will be downloaded to if a URL is provided |
-| `PHOTOFIELD_AI_VISUAL_MODEL` | `https://huggingface.co/mlunar/clip-variants/resolve/main/modelclip-vit-base-patch32-visual-float16.onnx` | URL or local file path to the visual ONNX CLIP model to use for image embedding. If a URL is provided, the model will first be downloaded to `PHOTOFIELD_AI_MODELS_DIR` if it doesn't exist there already. If a local path is provided, the model will be used as is. |
-| `PHOTOFIELD_AI_TEXTUAL_MODEL` | `https://huggingface.co/mlunar/clip-variants/resolve/main/modelclip-vit-base-patch32-textual-float16.onnx` | Same as `PHOTOFIELD_AI_VISUAL_MODEL`, but for the textual model used for text embedding. |
+| `PHOTOFIELD_AI_VISUAL_MODEL` | `https://huggingface.co/mlunar/clip-variants/resolve/main/models/clip-vit-base-patch32-visual-float16.onnx` | URL or local file path to the visual ONNX CLIP model to use for image embedding. If a URL is provided, the model will first be downloaded to `PHOTOFIELD_AI_MODELS_DIR` if it doesn't exist there already. If a local path is provided, the model will be used as is. |
+| `PHOTOFIELD_AI_TEXTUAL_MODEL` | `https://huggingface.co/mlunar/clip-variants/resolve/main/models/clip-vit-base-patch32-textual-float16.onnx` | Same as `PHOTOFIELD_AI_VISUAL_MODEL`, but for the textual model used for text embedding. |
 | `PHOTOFIELD_AI_RUNTIME` | `all` | `all` enables all available ONNX runtime providers, making use of any GPU or other accelerator device if you have the right [ONNX Runtime] prerequisites installed. `cpu` for CPU-only execution, which is faster to startup and develop with, but it is usually going to be ~10x slower than a GPU at inference. `cpu` is a shortcut for `PHOTOFIELD_AI_PROVIDERS=CPUExecutionProvider`. |
-| `PHOTOFIELD_AI_PROVIDERS` | unset | If `PHOTOFIELD_AI_RUNTIME` is not set, you can use this specify the ONNX providers you would like to use directly comma-delimited. For example: `CUDAExecutionProvider,CPUExecutionProvider`. |
+| `PHOTOFIELD_AI_PROVIDERS` | unset | If `PHOTOFIELD_AI_RUNTIME` is not set, you can use this to specify the ONNX providers you would like to use directly comma-delimited. For example: `CUDAExecutionProvider,CPUExecutionProvider`. |
+| `PHOTOFIELD_AI_FACES_ENABLED` | `1` | Set to `0` to disable face detection/recognition. When disabled, the `/faces` endpoint is not registered and no face models are loaded, reducing memory usage and startup time. |
 
 ### Models
 
@@ -397,11 +453,11 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 [norm]: https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm
 
 [Python]: https://www.python.org/
-[Git]: https://git-scm.com/downloads
 [uv]: https://docs.astral.sh/uv/
 [FastAPI]: https://fastapi.tiangolo.com/
 [ONNX Runtime]: https://onnxruntime.ai/
 [CLIP Variants]: https://huggingface.co/mlunar/clip-variants
+[UniFace]: https://github.com/yakhyo/uniface
 [clip-variants models]: https://huggingface.co/mlunar/clip-variants/tree/main/models
 [REST Client]: https://marketplace.visualstudio.com/items?itemName=humao.rest-client
 [Task]: https://taskfile.dev/

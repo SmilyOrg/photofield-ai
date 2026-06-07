@@ -10,21 +10,12 @@ on:
     branches:
       - 'main'
 
-env:
-  VISUAL_MODEL: 'https://huggingface.co/mlunar/clip-variants/resolve/main/models/clip-vit-base-patch32-visual-float16.onnx'
-  TEXTUAL_MODEL: 'https://huggingface.co/mlunar/clip-variants/resolve/main/models/clip-vit-base-patch32-textual-float16.onnx'
-
 jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Download models
-        shell: bash
-        run: |
-          wget -q --show-progress --progress=dot:mega -P models/ ${{ env.VISUAL_MODEL }} ${{ env.TEXTUAL_MODEL }}
 
       - name: Docker meta
         id: meta

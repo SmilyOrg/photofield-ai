@@ -37,7 +37,7 @@ tasks:
   run:
     desc: Run the server
     cmds:
-      - uv run python main.py
+      - uv run python main.py {{.CLI_ARGS}}
 
   watch:
     desc: Run the server in watch mode with auto-reload
@@ -47,7 +47,7 @@ tasks:
   docker:
     desc: Build a Docker image
     cmds:
-      - docker build -t {{.DOCKER_REPO}}:{{.VERSION}} -t {{.DOCKER_REPO}}:latest .
+      - docker build --build-arg VERSION={{.VERSION}} -t {{.DOCKER_REPO}}:{{.VERSION}} -t {{.DOCKER_REPO}}:latest .
 
   sync:
     desc: Install and sync dependencies
@@ -58,6 +58,19 @@ tasks:
     desc: Update dependencies to latest versions
     cmds:
       - uv lock --upgrade
+
+  ci:
+    desc: Full CI loop - start server, probe, benchmark, docker build, report size
+    env:
+      DOCKER_REPO: "{{.DOCKER_REPO}}"
+      VERSION: "{{.VERSION}}"
+    cmds:
+      - bash ci.sh
+
+  probe:
+    desc: Run integration tests against the running API (requires server to be running)
+    cmds:
+      - httpyac send --all --bail --output-failed response README.md examples.http
 
   benchmark:
     desc: Run performance benchmarks (requires server to be running)
